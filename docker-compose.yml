@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ./fluent-rails
+      dockerfile: Dockerfile
+    command: tail -f /dev/null  
+    volumes:
+      - ./fluent-rails:/app
+    working_dir: /app
+   
+  nginx:
+    image: nginx:latest
+    ports: 
+      - '8080:80' 
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    environment:
+      - NGINX_PORT=80
+       
+   
+  elasticsearch:
+    image: elasticsearch:7.5.0
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+
+  kibana:
+    image: kibana:7.5.0
+    volumes:
+      -  ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+  
+  fluentd:
+    build:
+      context: ./fluentd-server
+      dockerfile: Dockerfile
+    volumes: 
+      - ./fluentd-server/fluent.conf:/fluentd/etc/fluent.conf
+    ports:
+      - '24224:24224/udp'   
+    command: tail -f /dev/null  
