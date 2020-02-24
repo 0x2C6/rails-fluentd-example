@@ -7,3 +7,5 @@ This repo includes dockerized fluentd example with rails using elasticsearch as 
 * Kibana
 * Nginx
 * Rails 
+
+Create proper index pattern in kibana. For ex: `fluentd*`
